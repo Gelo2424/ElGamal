@@ -17,16 +17,16 @@
                 <Font name="Courier New" size="27.0" />
             </font>
         </Label>
-        <TextField fx:id="keyTextField" layoutX="141.0" layoutY="82.0" prefHeight="25.0" prefWidth="518.0" />
+        <TextField fx:id="keyGTextField" layoutX="141.0" layoutY="82.0" prefHeight="25.0" prefWidth="518.0" />
         <TextField fx:id="plaintextFileRead" layoutX="28.0" layoutY="343.0" prefHeight="25.0" prefWidth="168.0" />
-        <Button fx:id="encryptButton" layoutX="334.0" layoutY="484.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Encrypt" />
-        <Button fx:id="decryptButton" layoutX="334.0" layoutY="526.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Decrypt" />
-        <Label alignment="CENTER" layoutX="22.0" layoutY="82.0" prefHeight="25.0" prefWidth="121.0" text="Key public (g)" textFill="WHITE">
+        <Button fx:id="encryptButton" layoutX="334.0" layoutY="484.0" mnemonicParsing="false" onAction="#encrypt" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Encrypt" />
+        <Button fx:id="decryptButton" layoutX="334.0" layoutY="526.0" mnemonicParsing="false" onAction="#decrypt" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Decrypt" />
+        <Label alignment="CENTER" layoutX="22.0" layoutY="83.0" prefHeight="25.0" prefWidth="121.0" text="Key public (g)" textFill="WHITE">
             <font>
                 <Font name="Courier New" size="12.0" />
             </font>
         </Label>
-        <Button fx:id="generateKeyButton" layoutX="671.0" layoutY="80.0" mnemonicParsing="false" prefHeight="137.0" prefWidth="95.0" style="-fx-background-color: #FFA755;" text="Generate">
+        <Button fx:id="generateKeyButton" layoutX="671.0" layoutY="80.0" mnemonicParsing="false" onAction="#generateKey" prefHeight="137.0" prefWidth="95.0" style="-fx-background-color: #FFA755;" text="Generate">
          <font>
             <Font name="Courier New" size="12.0" />
          </font></Button>
@@ -35,8 +35,8 @@
                 <Font name="Courier New" size="12.0" />
             </font>
         </Label>
-        <Button fx:id="readKeyButton" layoutX="136.0" layoutY="235.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Read" />
-        <Button fx:id="writeKeyButton" layoutX="558.0" layoutY="235.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Write" />
+        <Button fx:id="readKeyButton" layoutX="136.0" layoutY="235.0" mnemonicParsing="false" onAction="#readKeyFile" prefHeight="51.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Read" />
+        <Button fx:id="writeKeyButton" layoutX="558.0" layoutY="235.0" mnemonicParsing="false" onAction="#writeKeyFile" prefHeight="51.0" prefWidth="107.0" style="-fx-background-color: #FFA755;" text="Write" />
         <TextArea fx:id="plaintextTextBox" layoutX="30.0" layoutY="399.0" prefHeight="169.0" prefWidth="246.0" wrapText="true" />
         <Label layoutX="28.0" layoutY="318.0" prefHeight="25.0" prefWidth="121.0" text="Plain text file:" textFill="WHITE">
             <font>
@@ -72,27 +72,27 @@
         </Label>
         <TextField fx:id="plaintextFileWrite" layoutX="28.0" layoutY="601.0" prefHeight="25.0" prefWidth="121.0" />
         <TextField fx:id="cyphertextFileWrite" layoutX="490.0" layoutY="601.0" prefHeight="25.0" prefWidth="121.0" />
-        <Button fx:id="plaintextOpenButton" layoutX="210.0" layoutY="343.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Open" />
-        <Button fx:id="cyphertextOpenButton" layoutX="671.0" layoutY="343.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Open" />
-        <Button fx:id="plaintextWriteButton" layoutX="157.0" layoutY="601.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Write" />
-        <Button fx:id="cyphertextWriteButton" layoutX="623.0" layoutY="601.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Write" />
+        <Button fx:id="plaintextOpenButton" layoutX="210.0" layoutY="343.0" mnemonicParsing="false" onAction="#openPlainText" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Open" />
+        <Button fx:id="cyphertextOpenButton" layoutX="671.0" layoutY="343.0" mnemonicParsing="false" onAction="#openCyphertText" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Open" />
+        <Button fx:id="plaintextWriteButton" layoutX="157.0" layoutY="601.0" mnemonicParsing="false" onAction="#writePlainText" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Write" />
+        <Button fx:id="cyphertextWriteButton" layoutX="623.0" layoutY="601.0" mnemonicParsing="false" onAction="#writeCypherText" prefHeight="25.0" prefWidth="66.0" style="-fx-background-color: #FFA755;" text="Write" />
         <RadioButton fx:id="textboxRadio" layoutX="355.0" layoutY="439.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="66.0" selected="true" text="Textbox" textFill="WHITE">
             <toggleGroup>
                 <ToggleGroup fx:id="type" />
             </toggleGroup>
         </RadioButton>
         <RadioButton fx:id="fileRadio" layoutX="355.0" layoutY="399.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="66.0" text="File" textFill="WHITE" toggleGroup="$type" />
-      <Button layoutX="741.0" layoutY="25.0" mnemonicParsing="false" prefHeight="35.0" prefWidth="35.0" style="-fx-background-color: #FF5C5C; -fx-background-radius: 100;" text="X">
+      <Button layoutX="741.0" layoutY="25.0" mnemonicParsing="false" onAction="#exit" prefHeight="35.0" prefWidth="35.0" style="-fx-background-color: #FF5C5C; -fx-background-radius: 100;" text="X">
          <cursor>
             <Cursor fx:constant="HAND" />
          </cursor>
       </Button>
-      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="22.0" layoutY="120.0" prefHeight="25.0" prefWidth="121.0" text="Key public (g)" textFill="WHITE">
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="22.0" layoutY="120.0" prefHeight="25.0" prefWidth="121.0" text="Key public (h)" textFill="WHITE">
          <font>
             <Font name="Courier New" size="12.0" />
          </font>
       </Label>
-      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="22.0" layoutY="157.0" prefHeight="25.0" prefWidth="121.0" text="Key public (a)" textFill="WHITE">
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="22.0" layoutY="157.0" prefHeight="25.0" prefWidth="121.0" text="Key private (a)" textFill="WHITE">
          <font>
             <Font name="Courier New" size="12.0" />
          </font>
@@ -102,9 +102,9 @@
             <Font name="Courier New" size="12.0" />
          </font>
       </Label>
-      <TextField fx:id="keyTextField1" layoutX="141.0" layoutY="120.0" prefHeight="25.0" prefWidth="518.0" />
-      <TextField fx:id="keyTextField2" layoutX="141.0" layoutY="157.0" prefHeight="25.0" prefWidth="518.0" />
-      <TextField fx:id="keyTextField3" layoutX="141.0" layoutY="193.0" prefHeight="25.0" prefWidth="518.0" />
+      <TextField fx:id="keyHTextField" layoutX="141.0" layoutY="120.0" prefHeight="25.0" prefWidth="518.0" />
+      <TextField fx:id="keyATextField" layoutX="141.0" layoutY="157.0" prefHeight="25.0" prefWidth="518.0" />
+      <TextField fx:id="modNTextField" layoutX="141.0" layoutY="193.0" prefHeight="25.0" prefWidth="518.0" />
       <Label alignment="CENTER" layoutX="430.0" layoutY="248.0" prefHeight="25.0" prefWidth="121.0" text="Key file:" textFill="#dadada">
          <font>
             <Font name="Courier New" size="12.0" />
