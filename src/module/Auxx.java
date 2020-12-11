@@ -43,33 +43,40 @@ public class Auxx
         catch (IOException e) {e.printStackTrace();}
     }
 
-
-    //zapisuje do pliku tablicę BigIntegerów
-    public static void zapiszDoPlikuTabliceBigInt(BigInteger dane[], String nazwa_pliku)
+    public static byte[] podtablica(byte dane[], int poczatek, int koniec)
     {
-        byte[] tab;
-        try {
-            File file = new File(nazwa_pliku);
-            FileOutputStream fos = new FileOutputStream(file);
-            for(int i = 0; i < dane.length; i++)
-            { if(dane[i].equals(BigInteger.ZERO))
-            { tab = new byte[1];
-                tab[0] = '\000';
-                fos.write(tab);
-            }
-            else
-            { tab = dane[i].toByteArray();
-                // byteArray powinna miec długosc 31
-                if(tab[0] == '\000' && tab.length == 32) tab = podtablica(tab, 1, tab.length);
-                if(tab.length == 30) tab = dodajZero(tab);
-                if(i == dane.length-1) // usun nulle z uzupelnienia
-                    tab = podtablicaBezZer(tab);
-                fos.write(tab);
-            }
-            }
-            fos.close();
-        } catch (FileNotFoundException e) {e.printStackTrace();} catch (IOException e) {e.printStackTrace();}
+        byte[] subArray = new byte[koniec-poczatek];
+        for(int i =0; poczatek < koniec; poczatek++, i++) subArray[i] = dane[poczatek];
+        return subArray;
     }
+
+
+//    //zapisuje do pliku tablicę BigIntegerów
+//    public static void zapiszDoPlikuTabliceBigInt(BigInteger dane[], String nazwa_pliku)
+//    {
+//        byte[] tab;
+//        try {
+//            File file = new File(nazwa_pliku);
+//            FileOutputStream fos = new FileOutputStream(file);
+//            for(int i = 0; i < dane.length; i++)
+//            { if(dane[i].equals(BigInteger.ZERO))
+//            { tab = new byte[1];
+//                tab[0] = '\000';
+//                fos.write(tab);
+//            }
+//            else
+//            { tab = dane[i].toByteArray();
+//                // byteArray powinna miec długosc 31
+//                if(tab[0] == '\000' && tab.length == 32) tab = podtablica(tab, 1, tab.length);
+//                if(tab.length == 30) tab = dodajZero(tab);
+//                if(i == dane.length-1) // usun nulle z uzupelnienia
+//                    tab = podtablicaBezZer(tab);
+//                fos.write(tab);
+//            }
+//            }
+//            fos.close();
+//        } catch (FileNotFoundException e) {e.printStackTrace();} catch (IOException e) {e.printStackTrace();}
+//    }
 
     //wczytuje dane z pliku do tabliy BigIntegerów
     public static BigInteger[] wczytajZPlikuTabliceBigInt(String nazwa_pliku)
@@ -148,16 +155,6 @@ public class Auxx
         return sb.toString();
     }
 
-
-    //zwraca podtablice z elementami od..do z podanej tablicy
-    public static byte[] podtablica(byte dane[], int poczatek, int koniec)
-    {
-        byte[] subArray = new byte[koniec-poczatek];
-        for(int i =0; poczatek < koniec; poczatek++, i++) subArray[i] = dane[poczatek];
-        return subArray;
-    }
-
-    //dodaje zero do tablicy bajtów
     public static byte[] dodajZero(byte dane[])
     {
         byte[] wynik = new byte[dane.length+1];
@@ -166,7 +163,6 @@ public class Auxx
         return wynik;
     }
 
-    //zwraca tablice z podanej tablicy z powycinanymi zerami
     public static byte[] podtablicaBezZer(byte dane[])
     {
         ArrayList<Byte> tab = new ArrayList<Byte>();
@@ -179,119 +175,4 @@ public class Auxx
             wynik[j] = tab.get(i).byteValue();
         return wynik;
     }
-
-    //sprawdza czy w bajcie podany bit jest ustawiony
-    public static boolean isBitSet(byte bajt, int bit)
-    {
-        return (bajt & (1 << bit)) != 0;
-    }
-
-    //ustawia podany bit w bajcie
-    public static byte setBitOne(byte bajt, int poz)
-    {
-        return (byte) (bajt | (1 << poz));
-    }
-
-    //kasuje podany bit w bajcie
-    public static byte setBitZero(byte bajt, int poz)
-    {
-        return (byte) (bajt & ~(1 << poz));
-    }
-
-    // zwraca wartość 0/1 bitu na podanej pozycji w podanej tablicy bajtów
-    public static int getBitAt(byte[] data, int poz)
-    {
-        int posByte = poz / 8;
-        int posBit = poz % 8;
-        byte valByte = data[posByte];
-        int valInt = valByte >> (7 - posBit) & 1;
-        return valInt;
-    }
-
-    //ustawia lub kasuje bit na podanej pozycji w podanej tablicy bajtów
-    public static void setBitAt(byte[] data, int pos, int val)
-    {
-        byte oldByte = data[pos / 8];
-        oldByte = (byte) (((0xFF7F >> (pos % 8)) & oldByte) & 0x00FF);
-        byte newByte = (byte) ((val << (7 - (pos % 8))) | oldByte);
-        data[pos / 8] = newByte;
-    }
-
-    //xoruje dwie tablice bajtów
-    public static byte[] XORBytes(byte[] a, byte[] b)
-    {
-        byte[] out = new byte[a.length];
-        for (int i = 0; i < a.length; i++)
-        {
-            out[i] = (byte) (a[i] ^ b[i]);
-        }
-        return out;
-    }
-
-
-    //cykliczne przesunięcie bitów w lewo o zadana ilość pozycji
-    public static byte[] rotateLeft(byte[] in, int len, int step)
-    {
-        byte[] out = new byte[(len - 1) / 8 + 1];
-        for (int i = 0; i < len; i++)
-        {
-            int val = getBitAt(in, (i + step) % len);
-            setBitAt(out, i, val);
-        }
-        return out;
-    }
-
-    //zwraca podaną ilość bitów od podanej pozycji z tablicy bajtów
-    public static byte[] selectBits(byte[] in, int pos, int len)
-    {
-        int numOfBytes = (len - 1) / 8 + 1;
-        byte[] out = new byte[numOfBytes];
-        for (int i = 0; i < len; i++) {
-            int val = Auxx.getBitAt(in, pos + i);
-            Auxx.setBitAt(out, i, val);
-        }
-        return out;
-    }
-
-    //wybiera bity z tablicy bajtów i zwraca w nowej tablicy
-    //wybierane te bity, które wskazane w drugim parametrze(każdy bajt tablicy map jest numerem bitu do pobrania z tablicy in)
-    public static byte[] selectBits(byte[] in, byte[] map)
-    {
-        int numOfBytes = (map.length - 1) / 8 + 1;
-        byte[] out = new byte[numOfBytes];
-        for (int i = 0; i < map.length; i++)
-        {
-            int val = getBitAt(in, map[i] - 1);
-            setBitAt(out, i, val);
-        }
-        return out;
-    }
-
-
-    //wypisuje dowolny tekst po którym wartości poszczególnych bitów z tabeli bajtów
-    public static void printBytes(byte[] data, String tekst)
-    {
-        System.out.println(tekst + ":");
-        for (int i = 0; i < data.length; i++)
-        {
-            System.out.print(byteToBits(data[i]) + " ");
-        }
-        System.out.println();
-    }
-
-    //zwraca wartości poszczególnych bitów w bajcie w postaci stringa
-    public static String byteToBits(byte b)
-    {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 8; i++)
-        {
-            sb.append((int) (b >> (8 - (i + 1)) & 0x0001));
-        }
-        return sb.toString();
-    }
-
-
-
-
-
-}//koniec klasy Auxx
+}

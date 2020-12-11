@@ -12,6 +12,7 @@ import module.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ElGamalController {
@@ -69,6 +70,47 @@ public class ElGamalController {
     public Button encryptButton;
     public Button decryptButton;
 
+//    public void encrypt() {
+//        if (textboxRadio.isSelected()) {
+//            if (plaintextTextBox.getText().isEmpty()) {
+//                DialogBox.dialogAboutError("Plaintext can't be empty!");
+//                return;
+//            }
+//            String plainText = plaintextTextBox.getText();
+//            elGamal.setPlainText(plainText);
+//        }
+//        if(fileRadio.isSelected()) {
+//            if (plaintextFileRead.getText().isEmpty()) {
+//                DialogBox.dialogAboutError("Choose o file!");
+//                return;
+//            }
+//        }
+//        String cypher = elGamal.encryptFromStringToString();
+//
+//        elGamal.setCypherText(cypher);
+//        cyphertextTextBox.setText(cypher);
+//    }
+//
+//    public void decrypt() {
+//        if (textboxRadio.isSelected()) {
+//            if (cyphertextTextBox.getText().isEmpty()) {
+//                DialogBox.dialogAboutError("Plaintext can't be empty!");
+//                return;
+//            }
+//            String cypherText = cyphertextTextBox.getText();
+//            elGamal.setCypherText(cypherText);
+//        }
+//        if(fileRadio.isSelected()) {
+//            if (cyphertextFileRead.getText().isEmpty()) {
+//                DialogBox.dialogAboutError("Choose o file!");
+//                return;
+//            }
+//        }
+//        String plainText = elGamal.decryptFromStringToString(elGamal.getCypherText());
+//        elGamal.setPlainText(plainText);
+//        plaintextTextBox.setText(plainText);
+//    }
+
     public void encrypt() {
         if (textboxRadio.isSelected()) {
             if (plaintextTextBox.getText().isEmpty()) {
@@ -76,7 +118,7 @@ public class ElGamalController {
                 return;
             }
             String plainText = plaintextTextBox.getText();
-            elGamal.setPlainText(plainText);
+            elGamal.setPlainTextByte(plainText.getBytes(StandardCharsets.ISO_8859_1));
         }
         if(fileRadio.isSelected()) {
             if (plaintextFileRead.getText().isEmpty()) {
@@ -84,10 +126,15 @@ public class ElGamalController {
                 return;
             }
         }
+        BigInteger[] cypher = elGamal.encrypt(elGamal.getPlainTextString());
 
-        String cypher = elGamal.encryptFromStringToString();
         elGamal.setCypherText(cypher);
-        cyphertextTextBox.setText(cypher);
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < cypher.length; i++) {
+            sb.append(cypher[i]);
+            sb.append("\n");
+        }
+        cyphertextTextBox.setText(sb.toString());
     }
 
     public void decrypt() {
@@ -97,7 +144,14 @@ public class ElGamalController {
                 return;
             }
             String cypherText = cyphertextTextBox.getText();
-            elGamal.setCypherText(cypherText);
+
+            String[] rows = cypherText.split("\n");
+            BigInteger[] cipher = new BigInteger[rows.length];
+            for(int i = 0; i < rows.length; i++) {
+                cipher[i] = new BigInteger(rows[i]);
+            }
+
+            elGamal.setCypherText(cipher);
         }
         if(fileRadio.isSelected()) {
             if (cyphertextFileRead.getText().isEmpty()) {
@@ -105,10 +159,15 @@ public class ElGamalController {
                 return;
             }
         }
-        String plainText = elGamal.decryptFromStringToString(elGamal.getCypherText());
-        System.out.println(plainText);
+        BigInteger[] plainText = elGamal.decryptToBigInt(elGamal.getCypherText());
         elGamal.setPlainText(plainText);
-        plaintextTextBox.setText(plainText);
+
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < plainText.length; i++) {
+            sb.append(Auxx.bigIntToString(plainText[i]));
+            sb.append("\n");
+        }
+        plaintextTextBox.setText(sb.toString());
     }
 
     public void generateKey() {
@@ -226,6 +285,8 @@ public class ElGamalController {
         elGamal.setH(new BigInteger(keyH));
         keyGTextField.setText(keyG);
         keyHTextField.setText(keyH);
+
+        elGamal.setNm1(elGamal.getN().subtract(BigInteger.ONE));
     }
 
     public void writeKeyFile() {
@@ -278,36 +339,33 @@ public class ElGamalController {
         if (file == null) {
             return;
         }
-        StringBuilder sb = null;
+        byte[] bytes = null;
         try {
-            BufferedReader in = new BufferedReader(new FileReader(file.toString(), StandardCharsets.ISO_8859_1));
-            sb = new StringBuilder();
-            while(in.ready()) {
-                sb.append(in.readLine());
-                sb.append("\n");
-            }
+            FileInputStream in = new FileInputStream(file);
+            int size = in.available();
+            bytes = new byte[size];
+            in.read(bytes);
             in.close();
         } catch(IOException e) {
             e.printStackTrace();
         }
-        if(sb == null) {
+        if(bytes == null) {
             DialogBox.dialogAboutError("File is empty!");
-            return;
         }
 
-        String plainText = sb.toString();
-        elGamal.setPlainText(plainText);
+        elGamal.setPlainTextString(new String(bytes, StandardCharsets.ISO_8859_1));
         plaintextFileRead.setText(file.toString());
-        plaintextTextBox.setText(plainText);
+        plaintextTextBox.setText(new String(bytes, StandardCharsets.ISO_8859_1));
     }
 
-    public void openCyphertText() {
-        File file = configureOpenFileChooser(fileChooser);
-        if (file == null) {
-            return;
-        }
+
+
+    public void openCyphertText()
+    {
+        File file = null;
         StringBuilder sb = null;
         try {
+            file = configureOpenFileChooser(fileChooser);
             BufferedReader in = new BufferedReader(new FileReader(file.toString()));
             sb = new StringBuilder();
             while(in.ready()) {
@@ -315,29 +373,32 @@ public class ElGamalController {
                 sb.append("\n");
             }
             in.close();
-        } catch(IOException e) {
+        } catch (FileNotFoundException e) {e.printStackTrace();} catch (IOException e) {
             e.printStackTrace();
         }
-        if(sb == null) {
-            DialogBox.dialogAboutError("File is empty!");
-            return;
+        String[] rows = sb.toString().split("\n");
+        BigInteger[] cipher = new BigInteger[rows.length];
+        for(int i = 0; i < rows.length; i++) {
+            cipher[i] = new BigInteger(rows[i]);
         }
 
-        String cypherText = sb.toString();
-
-        elGamal.setCypherText(cypherText);
+        elGamal.setCypherText(cipher);
         cyphertextFileRead.setText(file.toString());
-        cyphertextTextBox.setText(cypherText);
+        cyphertextTextBox.setText(sb.toString());
+
     }
 
     public void writePlainText() {
+        BigInteger[] dane = elGamal.getPlainText();
         File file = configureWriteFileChooser(fileChooser);
         if (file == null) {
             return;
         }
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(file.toString(), StandardCharsets.ISO_8859_1));
-            out.write(elGamal.getPlainText());
+            for(int i = 0; i < dane.length; i++){
+                out.write(Auxx.bigIntToString(dane[i]));
+            }
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -345,18 +406,22 @@ public class ElGamalController {
         plaintextFileWrite.setText(file.toString());
     }
 
-    public void writeCypherText() {
+    public void writeCypherText()
+    {
+        BigInteger[] dane = elGamal.getCypherText();
         File file = configureWriteFileChooser(fileChooser);
         if (file == null) {
             return;
         }
-        try{
-            BufferedWriter out = new BufferedWriter(new FileWriter(file.toString()));
-            out.write(elGamal.getCypherText());
+        try {
+            BufferedWriter out = new BufferedWriter(new FileWriter(file.toString(), StandardCharsets.ISO_8859_1));
+            for(int i = 0; i < dane.length; i++){
+                out.write(dane[i].toString());
+                out.write("\n");
+            }
             out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (FileNotFoundException e) {e.printStackTrace();} catch (IOException e) {e.printStackTrace();}
         cyphertextFileWrite.setText(file.toString());
     }
+
 }
