@@ -10,7 +10,6 @@ public class ElGamal
     public BigInteger[] plainText;
     public BigInteger[] cypherText;
     public byte[] plainTextByte;
-    public String plainTextString;
 
     BigInteger g;
     BigInteger a;
@@ -164,7 +163,4 @@ public class ElGamal
         this.plainTextByte = plainTextByte;
     }
 
-    public void setPlainTextString(String plaintText) {
-        this.plainTextString = plaintText;
-    }
 }

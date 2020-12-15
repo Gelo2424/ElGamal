@@ -68,7 +68,6 @@ public class ElGamalController {
                 return;
             }
             String plainText = plaintextTextBox.getText();
-            elGamal.setPlainTextString(plainText);
             elGamal.setPlainTextByte(plainText.getBytes(StandardCharsets.ISO_8859_1));
         }
         if(fileRadio.isSelected()) {
@@ -292,7 +291,6 @@ public class ElGamalController {
     }
 
 
-
     public void openCyphertText()
     {
         File file = null;
@@ -328,9 +326,10 @@ public class ElGamalController {
             return;
         }
         try{
-            BufferedWriter out = new BufferedWriter(new FileWriter(file.toString(), StandardCharsets.ISO_8859_1));
+            FileOutputStream out = new FileOutputStream(file);
+
             for (BigInteger bigInteger : dane) {
-                out.write(bigIntToString(bigInteger));
+                out.write(bigInteger.toByteArray());
             }
             out.close();
         } catch (IOException e) {
