@@ -122,10 +122,10 @@ public class ElGamalController {
 
     public void generateKey() {
         elGamal.generateKey();
-        keyATextField.setText(elGamal.getA().toString());
+        keyATextField.setText(elGamal.getX().toString());
         keyGTextField.setText(elGamal.getG().toString());
-        keyHTextField.setText(elGamal.getH().toString());
-        modNTextField.setText(elGamal.getN().toString());
+        keyHTextField.setText(elGamal.getY().toString());
+        modNTextField.setText(elGamal.getP().toString());
     }
 
     public static BigInteger stringToBigInt(String str)
@@ -175,21 +175,21 @@ public class ElGamalController {
         if (file == null) {
             return;
         }
-        String keyA = null;
+        String keyX = null;
         String mod = null;
         try {
             Scanner sc = new Scanner(file);
-            keyA = sc.nextLine();
+            keyX = sc.nextLine();
             mod = sc.nextLine();
             sc.close();
         } catch (FileNotFoundException e) {e.printStackTrace();}
-        if (keyA == null || mod == null) {
+        if (keyX == null || mod == null) {
             DialogBox.dialogAboutError("Private key cant be null");
             return;
         }
-        elGamal.setA(new BigInteger(keyA));
-        elGamal.setN(new BigInteger(mod));
-        keyATextField.setText(keyA);
+        elGamal.setX(new BigInteger(keyX));
+        elGamal.setP(new BigInteger(mod));
+        keyATextField.setText(keyX);
         modNTextField.setText(mod);
 
         fileChooser.setTitle("Write a public Key");
@@ -201,23 +201,23 @@ public class ElGamalController {
             return;
         }
         String keyG = null;
-        String keyH = null;
+        String keyY = null;
         try {
             Scanner sc = new Scanner(file);
             keyG = sc.nextLine();
-            keyH = sc.nextLine();
+            keyY = sc.nextLine();
             sc.close();
         } catch (FileNotFoundException e) {e.printStackTrace();}
-        if (keyG == null || keyH == null) {
+        if (keyG == null || keyY == null) {
             DialogBox.dialogAboutError("Public key cant be null");
             return;
         }
         elGamal.setG(new BigInteger(keyG));
-        elGamal.setH(new BigInteger(keyH));
+        elGamal.setY(new BigInteger(keyY));
         keyGTextField.setText(keyG);
-        keyHTextField.setText(keyH);
+        keyHTextField.setText(keyY);
 
-        elGamal.setNm1(elGamal.getN().subtract(BigInteger.ONE));
+        elGamal.setPm1(elGamal.getP().subtract(BigInteger.ONE));
     }
 
     public void writeKeyFile() {
@@ -231,8 +231,8 @@ public class ElGamalController {
         }
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(file.toString()));
-            String keyA = elGamal.getA().toString();
-            String mod = elGamal.getN().toString();
+            String keyA = elGamal.getX().toString();
+            String mod = elGamal.getP().toString();
             out.write(keyA);
             out.append('\n');
             out.append(mod);
@@ -252,8 +252,8 @@ public class ElGamalController {
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(file.toString()));
             String keyG = elGamal.getG().toString();
-            String keyH = elGamal.getH().toString();
-            String mod = elGamal.getN().toString();
+            String keyH = elGamal.getY().toString();
+            String mod = elGamal.getP().toString();
             out.write(keyG);
             out.append('\n');
             out.append(keyH);

@@ -12,33 +12,37 @@ public class ElGamal
     public byte[] plainTextByte;
 
     BigInteger g;
-    BigInteger a;
-    BigInteger h;
-    BigInteger r;
-    BigInteger N;
-    BigInteger Nm1;
+    BigInteger x;
+    BigInteger y;
+    BigInteger k;
+    BigInteger p;
+    BigInteger pm1;
     int keyLen=512;
 
     public void generateKey() {
-        N = BigInteger.probablePrime(keyLen+2,new Random());
-        a = new BigInteger(keyLen,new Random());
+        //PRIVATE KEY
+        x = new BigInteger(keyLen,new Random());
+
+        //PUBLIC KEY
         g = new BigInteger(keyLen,new Random());
-        h = g.modPow(a,N);
-        Nm1  =N.subtract(BigInteger.ONE);
+        y = g.modPow(x, p);
+
+        p = BigInteger.probablePrime(keyLen+2,new Random());
+        pm1 = p.subtract(BigInteger.ONE);
     }
 
     public BigInteger[] encrypt(byte[] message) {
-        //generujemy nowe r dla każdego szyfrowania
-        r = BigInteger.probablePrime(keyLen, new Random());
+        //nowe k dla kazdego szyfrowania
+        k = BigInteger.probablePrime(keyLen, new Random());
         while(true) {
-            if (r.gcd(Nm1).equals(BigInteger.ONE)) {
+            if (k.gcd(pm1).equals(BigInteger.ONE)) {
                 break;
             }
             else {
-                r = r.nextProbablePrime();
+                k = k.nextProbablePrime();
             }
         }
-        int signs = (a.bitLength()-1) / 8;
+        int signs = (x.bitLength()-1) / 8;
         boolean rest = false; //RESZTA
         int chunks = 0;
         if(message.length % signs != 0) {
@@ -53,21 +57,21 @@ public class ElGamal
             for (int i = 0, j = 0; i < chunks; i++, j+=2) {
                 byte[] pom = subtable(message, signs * i, signs * (i + 1));
                 cipher[j] = new BigInteger(1, pom);
-                cipher[j] = cipher[j].multiply(h.modPow(r,N)).mod(N);//C2
-                cipher[j+1] = g.modPow(r,N);//C1
+                cipher[j] = cipher[j].multiply(y.modPow(k, p)).mod(p);//C2
+                cipher[j+1] = g.modPow(k, p);//C1
             }
         }
         else {
             for (int i = 0, j = 0; i < chunks-1; i++, j+=2) {
                 byte[] pom = subtable(message, signs * i, signs * (i + 1));
                 cipher[j] = new BigInteger(1, pom);
-                cipher[j] = cipher[j].multiply(h.modPow(r,N)).mod(N);//C2
-                cipher[j+1] = g.modPow(r,N);//C1
+                cipher[j] = cipher[j].multiply(y.modPow(k, p)).mod(p);//C2
+                cipher[j+1] = g.modPow(k, p);//C1
             }
             byte[] pom = subtable(message, signs*(chunks-1), message.length);
             cipher[(chunks-1) * 2] = new BigInteger(1, pom);
-            cipher[(chunks-1) * 2] = cipher[(chunks-1) * 2].multiply(h.modPow(r,N)).mod(N);//C2
-            cipher[((chunks-1) * 2) + 1] = g.modPow(r,N);//C1
+            cipher[(chunks-1) * 2] = cipher[(chunks-1) * 2].multiply(y.modPow(k, p)).mod(p);//C2
+            cipher[((chunks-1) * 2) + 1] = g.modPow(k, p);//C1
         }
         return cipher;
     }
@@ -76,7 +80,7 @@ public class ElGamal
         int len= cipher.length / 2;
         BigInteger[] result = new BigInteger[len];
         for (int i = 0, j = 0; i < len; i++, j+=2)
-            result[i] = cipher[j].multiply(cipher[j+1].modPow(a, N).modInverse(N)).mod(N);
+            result[i] = cipher[j].multiply(cipher[j+1].modPow(x, p).modInverse(p)).mod(p);
         return result;
     }
 
@@ -111,32 +115,32 @@ public class ElGamal
         this.g = g;
     }
 
-    public BigInteger getA() {
-        return a;
+    public BigInteger getX() {
+        return x;
     }
 
-    public void setA(BigInteger a) {
-        this.a = a;
+    public void setX(BigInteger x) {
+        this.x = x;
     }
 
-    public BigInteger getH() {
-        return h;
+    public BigInteger getY() {
+        return y;
     }
 
-    public void setH(BigInteger h) {
-        this.h = h;
+    public void setY(BigInteger y) {
+        this.y = y;
     }
 
-    public BigInteger getN() {
-        return N;
+    public BigInteger getP() {
+        return p;
     }
 
-    public void setN(BigInteger n) {
-        N = n;
+    public void setP(BigInteger p) {
+        this.p = p;
     }
 
-    public void setNm1(BigInteger nm1) {
-        Nm1 = nm1;
+    public void setPm1(BigInteger pm1) {
+        this.pm1 = pm1;
     }
 
     public BigInteger[] getCypherText() {
