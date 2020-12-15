@@ -12,15 +12,9 @@ import module.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class ElGamalController {
-
-
-
-    @FXML
-    private MainController mainController;
 
     private final FileChooser fileChooser = new FileChooser();
     public ElGamal elGamal = new ElGamal();
@@ -28,10 +22,6 @@ public class ElGamalController {
     @FXML
     public void exit() {
         Platform.exit();
-    }
-
-    public void setMainController(MainController mainController) {
-        this.mainController = mainController;
     }
 
     @FXML//KEY
@@ -70,46 +60,6 @@ public class ElGamalController {
     public Button encryptButton;
     public Button decryptButton;
 
-//    public void encrypt() {
-//        if (textboxRadio.isSelected()) {
-//            if (plaintextTextBox.getText().isEmpty()) {
-//                DialogBox.dialogAboutError("Plaintext can't be empty!");
-//                return;
-//            }
-//            String plainText = plaintextTextBox.getText();
-//            elGamal.setPlainText(plainText);
-//        }
-//        if(fileRadio.isSelected()) {
-//            if (plaintextFileRead.getText().isEmpty()) {
-//                DialogBox.dialogAboutError("Choose o file!");
-//                return;
-//            }
-//        }
-//        String cypher = elGamal.encryptFromStringToString();
-//
-//        elGamal.setCypherText(cypher);
-//        cyphertextTextBox.setText(cypher);
-//    }
-//
-//    public void decrypt() {
-//        if (textboxRadio.isSelected()) {
-//            if (cyphertextTextBox.getText().isEmpty()) {
-//                DialogBox.dialogAboutError("Plaintext can't be empty!");
-//                return;
-//            }
-//            String cypherText = cyphertextTextBox.getText();
-//            elGamal.setCypherText(cypherText);
-//        }
-//        if(fileRadio.isSelected()) {
-//            if (cyphertextFileRead.getText().isEmpty()) {
-//                DialogBox.dialogAboutError("Choose o file!");
-//                return;
-//            }
-//        }
-//        String plainText = elGamal.decryptFromStringToString(elGamal.getCypherText());
-//        elGamal.setPlainText(plainText);
-//        plaintextTextBox.setText(plainText);
-//    }
 
     public void encrypt() {
         if (textboxRadio.isSelected()) {
@@ -118,6 +68,7 @@ public class ElGamalController {
                 return;
             }
             String plainText = plaintextTextBox.getText();
+            elGamal.setPlainTextString(plainText);
             elGamal.setPlainTextByte(plainText.getBytes(StandardCharsets.ISO_8859_1));
         }
         if(fileRadio.isSelected()) {
@@ -126,12 +77,12 @@ public class ElGamalController {
                 return;
             }
         }
-        BigInteger[] cypher = elGamal.encrypt(elGamal.getPlainTextString());
+        BigInteger[] cypher = elGamal.encrypt(elGamal.getPlainTextByte());
 
         elGamal.setCypherText(cypher);
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < cypher.length; i++) {
-            sb.append(cypher[i]);
+        for (BigInteger bigInteger : cypher) {
+            sb.append(bigInteger);
             sb.append("\n");
         }
         cyphertextTextBox.setText(sb.toString());
@@ -163,8 +114,8 @@ public class ElGamalController {
         elGamal.setPlainText(plainText);
 
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < plainText.length; i++) {
-            sb.append(Auxx.bigIntToString(plainText[i]));
+        for (BigInteger bigInteger : plainText) {
+            sb.append(bigIntToString(bigInteger));
             sb.append("\n");
         }
         plaintextTextBox.setText(sb.toString());
@@ -178,24 +129,6 @@ public class ElGamalController {
         modNTextField.setText(elGamal.getN().toString());
     }
 
-    public static String byteArrayToHexString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for(byte b : bytes) {
-            sb.append(String.format("%02X", b));
-        }
-        return sb.toString();
-    }
-
-    private static String hexToAscii(String hexStr) {
-        StringBuilder output = new StringBuilder("");
-        for (int i = 0; i < hexStr.length(); i += 2) {
-            String str = hexStr.substring(i, i + 2);
-            output.append((char) Integer.parseInt(str, 16));
-        }
-
-        return output.toString();
-    }
-
     public static BigInteger stringToBigInt(String str)
     {
         byte[] tab = new byte[str.length()];
@@ -207,9 +140,8 @@ public class ElGamalController {
     public static String bigIntToString(BigInteger n)
     {
         byte[] tab = n.toByteArray();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < tab.length; i++)
-            sb.append((char)tab[i]);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : tab) sb.append((char) b);
         return sb.toString();
     }
 
@@ -351,9 +283,10 @@ public class ElGamalController {
         }
         if(bytes == null) {
             DialogBox.dialogAboutError("File is empty!");
+            return;
         }
 
-        elGamal.setPlainTextString(new String(bytes, StandardCharsets.ISO_8859_1));
+        elGamal.setPlainTextByte(bytes);
         plaintextFileRead.setText(file.toString());
         plaintextTextBox.setText(new String(bytes, StandardCharsets.ISO_8859_1));
     }
@@ -373,9 +306,9 @@ public class ElGamalController {
                 sb.append("\n");
             }
             in.close();
-        } catch (FileNotFoundException e) {e.printStackTrace();} catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) {e.printStackTrace();}
+
+        assert sb != null;
         String[] rows = sb.toString().split("\n");
         BigInteger[] cipher = new BigInteger[rows.length];
         for(int i = 0; i < rows.length; i++) {
@@ -396,8 +329,8 @@ public class ElGamalController {
         }
         try{
             BufferedWriter out = new BufferedWriter(new FileWriter(file.toString(), StandardCharsets.ISO_8859_1));
-            for(int i = 0; i < dane.length; i++){
-                out.write(Auxx.bigIntToString(dane[i]));
+            for (BigInteger bigInteger : dane) {
+                out.write(bigIntToString(bigInteger));
             }
             out.close();
         } catch (IOException e) {

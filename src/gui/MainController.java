@@ -26,8 +26,6 @@ public class MainController {
         catch (IOException e) {
             e.printStackTrace();
         }
-        ElGamalController elGamalController = loader.getController();
-        elGamalController.setMainController(this);
         setScreen(pane);
     }
 
