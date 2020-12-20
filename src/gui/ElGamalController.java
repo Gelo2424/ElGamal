@@ -12,6 +12,7 @@ import module.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ElGamalController {
@@ -76,7 +77,7 @@ public class ElGamalController {
                 return;
             }
         }
-        BigInteger[] cypher = elGamal.encrypt(elGamal.getPlainTextByte());
+        BigInteger[] cypher = elGamal.encrypt();
 
         elGamal.setCypherText(cypher);
         StringBuilder sb = new StringBuilder();
@@ -109,7 +110,7 @@ public class ElGamalController {
                 return;
             }
         }
-        BigInteger[] plainText = elGamal.decryptToBigInt(elGamal.getCypherText());
+        BigInteger[] plainText = elGamal.decryptToBigInt();
         elGamal.setPlainText(plainText);
 
         StringBuilder sb = new StringBuilder();
@@ -325,7 +326,8 @@ public class ElGamalController {
         if (file == null) {
             return;
         }
-        try{
+        byte[] tab;
+        try {
             FileOutputStream out = new FileOutputStream(file);
 
             for (BigInteger bigInteger : dane) {
@@ -337,6 +339,7 @@ public class ElGamalController {
         }
         plaintextFileWrite.setText(file.toString());
     }
+
 
     public void writeCypherText()
     {
@@ -352,7 +355,7 @@ public class ElGamalController {
                 out.write("\n");
             }
             out.close();
-        } catch (FileNotFoundException e) {e.printStackTrace();} catch (IOException e) {e.printStackTrace();}
+        } catch (IOException e) {e.printStackTrace();}
         cyphertextFileWrite.setText(file.toString());
     }
 

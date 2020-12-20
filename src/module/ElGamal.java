@@ -20,90 +20,76 @@ public class ElGamal
     int keyLen=512;
 
     public void generateKey() {
+        p = BigInteger.probablePrime(keyLen+2,new Random()); //Liczba pierwsza
+        pm1 = p.subtract(BigInteger.ONE);
+
         //PRIVATE KEY
         x = new BigInteger(keyLen,new Random());
 
         //PUBLIC KEY
         g = new BigInteger(keyLen,new Random());
         y = g.modPow(x, p);
-
-        p = BigInteger.probablePrime(keyLen+2,new Random());
-        pm1 = p.subtract(BigInteger.ONE);
     }
 
-    public BigInteger[] encrypt(byte[] message) {
+    public BigInteger[] encrypt() {
         //nowe k dla kazdego szyfrowania
         k = BigInteger.probablePrime(keyLen, new Random());
         while(true) {
-            if (k.gcd(pm1).equals(BigInteger.ONE)) {
+            if (k.gcd(pm1).equals(BigInteger.ONE)) { // k wzglednie pierwsze do pm1
                 break;
             }
             else {
                 k = k.nextProbablePrime();
             }
         }
-        int signs = (x.bitLength()-1) / 8;
+
+        int signs = (x.bitLength()-1) / 8; // ilosc bajtow
         boolean rest = false; //RESZTA
-        int chunks = 0;
-        if(message.length % signs != 0) {
-            chunks = (message.length/ signs)+1;
+        int block;
+        if(plainTextByte.length % signs != 0) { // M % sings != 0
+            block = (plainTextByte.length/ signs)+1; // ilosc blokow do szyfrowania - M % sings + 1 (bo reszta)
             rest = true;
         }
         else {
-            chunks = message.length/ signs;
+            block = plainTextByte.length/ signs; // ilosc blokow do szyfrowania - M % sings (bez reszty)
         }
-        BigInteger[] cipher = new BigInteger[chunks*2];
-        if(!rest) {
-            for (int i = 0, j = 0; i < chunks; i++, j+=2) {
-                byte[] pom = subtable(message, signs * i, signs * (i + 1));
-                cipher[j] = new BigInteger(1, pom);
-                cipher[j] = cipher[j].multiply(y.modPow(k, p)).mod(p);//C2
-                cipher[j+1] = g.modPow(k, p);//C1
+        BigInteger[] cipher = new BigInteger[block*2]; // dwa razy wiecej miejsca bo obliczamy a i b
+        if(!rest) { // Jezeli nie ma reszty
+            for (int i = 0, j = 0; i < block; i++, j+=2) {
+                byte[] pom = subtable(plainTextByte, signs * i, signs * (i + 1)); // Bierzemy pierwszy block
+                cipher[j] = new BigInteger(1, pom); // Message
+                cipher[j] = cipher[j].multiply(y.modPow(k, p)).mod(p);//b
+                cipher[j+1] = g.modPow(k, p);//a
             }
         }
         else {
-            for (int i = 0, j = 0; i < chunks-1; i++, j+=2) {
-                byte[] pom = subtable(message, signs * i, signs * (i + 1));
+            for (int i = 0, j = 0; i < block-1; i++, j+=2) {
+                byte[] pom = subtable(plainTextByte, signs * i, signs * (i + 1));
                 cipher[j] = new BigInteger(1, pom);
                 cipher[j] = cipher[j].multiply(y.modPow(k, p)).mod(p);//C2
                 cipher[j+1] = g.modPow(k, p);//C1
             }
-            byte[] pom = subtable(message, signs*(chunks-1), message.length);
-            cipher[(chunks-1) * 2] = new BigInteger(1, pom);
-            cipher[(chunks-1) * 2] = cipher[(chunks-1) * 2].multiply(y.modPow(k, p)).mod(p);//C2
-            cipher[((chunks-1) * 2) + 1] = g.modPow(k, p);//C1
+            //DODATKOWY BLOCK
+            byte[] pom = subtable(plainTextByte, signs*(block-1), plainTextByte.length);
+            cipher[(block-1) * 2] = new BigInteger(1, pom);
+            cipher[(block-1) * 2] = cipher[(block-1) * 2].multiply(y.modPow(k, p)).mod(p);//C2
+            cipher[((block-1) * 2) + 1] = g.modPow(k, p);//C1
         }
         return cipher;
     }
 
-    public BigInteger[] decryptToBigInt(BigInteger[] cipher) {
-        int len= cipher.length / 2;
+    public BigInteger[] decryptToBigInt() {
+        int len = cypherText.length / 2;
         BigInteger[] result = new BigInteger[len];
-        for (int i = 0, j = 0; i < len; i++, j+=2)
-            result[i] = cipher[j].multiply(cipher[j+1].modPow(x, p).modInverse(p)).mod(p);
+        for (int i = 0, j = 0; i < len; i++, j+=2) {
+            result[i] = cypherText[j].multiply(cypherText[j+1].modPow(x, p).modInverse(p)).mod(p);
+        }
         return result;
     }
 
     public static byte[] subtable(byte[] dane, int poczatek, int koniec) {
         return Arrays.copyOfRange(dane, poczatek, koniec);
     }
-
-
-//    public static BigInteger stringToBigInt(String str) {
-//        byte[] tab = new byte[str.length()];
-//        for (int i = 0; i < tab.length; i++)
-//            tab[i] = (byte)str.charAt(i);
-//        return new BigInteger(1,tab);
-//    }
-//
-//    public static String bigIntToString(BigInteger n) {
-//        byte[] tab = n.toByteArray();
-//        StringBuffer sb = new StringBuffer();
-//        for (int i = 0; i < tab.length; i++)
-//            sb.append((char)tab[i]);
-//        return sb.toString();
-//    }
-
 
     //GETTERS & SETTERS
 
