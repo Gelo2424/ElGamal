@@ -326,12 +326,20 @@ public class ElGamalController {
         if (file == null) {
             return;
         }
-        byte[] tab;
         try {
             FileOutputStream out = new FileOutputStream(file);
 
             for (BigInteger bigInteger : dane) {
-                out.write(bigInteger.toByteArray());
+                byte[] tab = bigInteger.toByteArray();
+                byte[] temp;
+                if(tab[0] == 0) {
+                    temp = ElGamal.subtable(tab, 1, tab.length);
+                    out.write(temp);
+                }
+                else{
+                    out.write(tab);
+                }
+
             }
             out.close();
         } catch (IOException e) {
