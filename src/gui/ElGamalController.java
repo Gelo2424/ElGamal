@@ -12,7 +12,6 @@ import module.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ElGamalController {
@@ -110,15 +109,12 @@ public class ElGamalController {
                 return;
             }
         }
-        BigInteger[] plainText = elGamal.decryptToBigInt();
-        elGamal.setPlainText(plainText);
+        byte[] plainText = elGamal.decrypt();
+        elGamal.setPlainTextByte(plainText);
 
-        StringBuilder sb = new StringBuilder();
-        for (BigInteger bigInteger : plainText) {
-            sb.append(bigIntToString(bigInteger));
-            sb.append("\n");
-        }
-        plaintextTextBox.setText(sb.toString());
+
+        plaintextTextBox.setText(new String(plainText));
+
     }
 
     public void generateKey() {
@@ -128,23 +124,6 @@ public class ElGamalController {
         keyHTextField.setText(elGamal.getY().toString());
         modNTextField.setText(elGamal.getP().toString());
     }
-
-    public static BigInteger stringToBigInt(String str)
-    {
-        byte[] tab = new byte[str.length()];
-        for (int i = 0; i < tab.length; i++)
-            tab[i] = (byte)str.charAt(i);
-        return new BigInteger(1,tab);
-    }
-
-    public static String bigIntToString(BigInteger n)
-    {
-        byte[] tab = n.toByteArray();
-        StringBuilder sb = new StringBuilder();
-        for (byte b : tab) sb.append((char) b);
-        return sb.toString();
-    }
-
 
 
     //READ FROM FILE & WRITE TO FILE
@@ -266,6 +245,7 @@ public class ElGamalController {
         }
     }
 
+    //czytanie z pliku
     public void openPlainText() {
         File file = configureOpenFileChooser(fileChooser);
         if (file == null) {
@@ -292,8 +272,7 @@ public class ElGamalController {
     }
 
 
-    public void openCyphertText()
-    {
+    public void openCyphertText() {
         File file = null;
         StringBuilder sb = null;
         try {
@@ -321,26 +300,14 @@ public class ElGamalController {
     }
 
     public void writePlainText() {
-        BigInteger[] dane = elGamal.getPlainText();
+        byte[] dane = elGamal.getPlainTextByte();
         File file = configureWriteFileChooser(fileChooser);
         if (file == null) {
             return;
         }
         try {
             FileOutputStream out = new FileOutputStream(file);
-
-            for (BigInteger bigInteger : dane) {
-                byte[] tab = bigInteger.toByteArray();
-                byte[] temp;
-                if(tab[0] == 0) {
-                    temp = ElGamal.subtable(tab, 1, tab.length);
-                    out.write(temp);
-                }
-                else{
-                    out.write(tab);
-                }
-
-            }
+            out.write(dane);
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -349,8 +316,7 @@ public class ElGamalController {
     }
 
 
-    public void writeCypherText()
-    {
+    public void writeCypherText() {
         BigInteger[] dane = elGamal.getCypherText();
         File file = configureWriteFileChooser(fileChooser);
         if (file == null) {
